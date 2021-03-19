@@ -2,7 +2,7 @@ package com.harsha.di
 
 import com.harsha.data.RepoService
 import com.harsha.data.repositoryImpl.HomeRepositoryImpl
-import com.hemanth.cricbuzz.data.repository.HomeRepository
+import com.harsha.data.repository.HomeRepository
 import dagger.Module
 import dagger.Provides
 

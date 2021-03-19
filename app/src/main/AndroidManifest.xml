@@ -11,8 +11,10 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:usesCleartextTraffic="true"
         android:theme="@style/Theme.SplashActivity">
-        <activity android:name="com.harsha.ui.splashactivity.SplashActivity">
+        <activity android:name="com.harsha.ui.splashactivity.SplashActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -20,7 +22,8 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="com.harsha.ui.home.HomeActivity"/>
+        <activity android:name="com.harsha.ui.home.HomeActivity"
+            android:screenOrientation="portrait"/>
     </application>
 
 </manifest>

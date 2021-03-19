@@ -3,7 +3,6 @@ package com.harsha.ui.splashactivity
 import android.content.Intent
 import android.os.Bundle
 import android.view.animation.AnimationUtils
-import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -60,6 +59,7 @@ class SplashActivity : DaggerAppCompatActivity() {
             if(it){
                 var intent= Intent(this,HomeActivity::class.java)
                 startActivity(intent)
+                finish()
             }
         })
     }

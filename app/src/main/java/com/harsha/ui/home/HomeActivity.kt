@@ -1,16 +1,14 @@
 package com.harsha.ui.home
 
-import android.content.Intent
+import android.graphics.BitmapFactory
 import android.os.Bundle
-import android.view.animation.AnimationUtils
-import android.widget.Toast
+import android.view.View
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import com.harsha.ui.splashactivity.R
 import com.harsha.ui.splashactivity.databinding.HomeActivityBinding
-import com.harsha.ui.splashactivity.databinding.SplashActivityBinding
 import dagger.android.support.DaggerAppCompatActivity
 import javax.inject.Inject
 
@@ -25,8 +23,8 @@ class HomeActivity : DaggerAppCompatActivity() {
         super.onCreate(savedInstanceState)
         initializeView()
         initializeViewModel()
-        runAnimation()
-        dalayObserver()
+        observeRoomDatabase()
+        observeNetworkState()
     }
 
     /**
@@ -34,6 +32,9 @@ class HomeActivity : DaggerAppCompatActivity() {
      */
     private fun initializeView() {
         mBinding = DataBindingUtil.setContentView(this, R.layout.home_activity)
+        mBinding.tvClick.setOnClickListener {
+            homeViewModel.getImageDetails()
+        }
     }
 
     /**
@@ -42,26 +43,31 @@ class HomeActivity : DaggerAppCompatActivity() {
     private fun initializeViewModel() {
         homeViewModel = ViewModelProviders.of(this, viewModelFactory).get(HomeViewModel::class.java)
         mBinding.viewModel=homeViewModel
-        homeViewModel.delayScreen()
     }
 
     /**
-     * text animation
+     * observing the room database data
      */
-    private fun runAnimation() {
-        val animation = AnimationUtils.loadAnimation(this, R.anim.fade_in)
-        mBinding.tvSplashTitle.startAnimation(animation)
-    }
-
-    /**
-     * observing the delay to move next activity
-     */
-    private fun dalayObserver(){
-        homeViewModel.onDelayObserver().observe(this, Observer {
-            if(it){
-
-                Toast.makeText(this,"Home Activity",Toast.LENGTH_SHORT).show()
+    private fun observeRoomDatabase(){
+        homeViewModel.getImageFromRoom()!!.observe(this, Observer {
+            if(it!=null && it.size>0){
+                var byte= it[0].image
+                val bmp = BitmapFactory.decodeByteArray(byte, 0,byte.size)
+                mBinding.tvSplashTitle.setImageBitmap(bmp)
             }
+
+        })
+    }
+
+    /**
+     * observing the network state
+     */
+    private fun observeNetworkState(){
+        homeViewModel.checkNetworkState().observe(this, Observer {
+            if(it!=null && it)
+                mBinding.clNetWork.visibility= View.VISIBLE
+            else
+                mBinding.clNetWork.visibility= View.GONE
         })
     }
 }

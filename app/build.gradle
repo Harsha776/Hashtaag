@@ -9,14 +9,13 @@ android {
     buildToolsVersion "30.0.2"
 
     defaultConfig {
-        applicationId "com.example.splashactivity"
+        applicationId "com.example.Hashtaag"
         minSdkVersion 16
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
 
-        buildConfigField("String", "BASE_URL", "\"https://newsapi.org/\"")
-        buildConfigField("String", "API_key", "\"f342601e63814aa092e93ef5ee77b5d2\"")
+        buildConfigField("String", "BASE_URL", "\"http://203.90.77.58:3004/\"")
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -62,6 +61,14 @@ dependencies {
     implementation "com.squareup.retrofit2:adapter-rxjava2:2.5.0"
     implementation "com.squareup.okhttp3:okhttp:4.9.0"
     implementation "com.squareup.okhttp3:logging-interceptor:4.9.0"
+
+    // - - Room Persistence Library
+    def room_version = "2.2.5"
+
+    implementation "androidx.room:room-runtime:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
+    // optional - Kotlin Extensions and Coroutines support for Room
+    implementation "androidx.room:room-ktx:$room_version"
 
     //rxJava
     implementation "io.reactivex.rxjava2:rxjava:2.2.18"

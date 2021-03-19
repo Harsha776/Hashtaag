@@ -1,11 +1,11 @@
-package com.hemanth.cricbuzz.data.repository
+package com.harsha.data.repository
 
-import com.hemanth.cricbuzz.data.model.NewsResponse
 import io.reactivex.Single
+import okhttp3.ResponseBody
 import retrofit2.Response
 
 interface HomeRepository {
 
-    fun getNewsDetails(): Single<Response<NewsResponse>>
+    fun getPostDetails(): Single<Response<ResponseBody>>
 
 }

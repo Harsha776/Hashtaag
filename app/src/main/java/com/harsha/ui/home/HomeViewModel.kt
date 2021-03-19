@@ -1,67 +1,85 @@
 package com.harsha.ui.home
 
-import android.os.Handler
-import android.os.Looper
+import android.content.Context
+import android.os.AsyncTask
 import android.util.Log
 import androidx.databinding.ObservableBoolean
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.harsha.common.Constants.SPLASH_DELAY_MILLIS
-import com.harsha.common.Constants.TRUE
+import com.harsha.common.Constants.PATH
 import com.harsha.common.NoConnectivityException
-import com.hemanth.cricbuzz.data.model.NewsResponse
-import com.hemanth.cricbuzz.data.repository.HomeRepository
+import com.harsha.common.Utility
+import com.harsha.data.model.ImagePojo
+import com.harsha.data.repository.HomeRepository
+import com.harsha.data.repository.ImageRepository
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.observers.DisposableSingleObserver
 import io.reactivex.schedulers.Schedulers
+import okhttp3.ResponseBody
+import org.json.JSONObject
 import retrofit2.Response
 import javax.inject.Inject
 
 
-class HomeViewModel @Inject constructor( private val homeRepository: HomeRepository):ViewModel() {
+class HomeViewModel @Inject constructor(
+    private val homeRepository: HomeRepository,
+    mContext: Context
+) : ViewModel() {
 
-    private val _time = MutableLiveData<Boolean>()
-     val progressBar=ObservableBoolean(false)
-
-     fun delayScreen(){
-         Handler(Looper.getMainLooper()).postDelayed({
-//             _time.postValue(TRUE)
-             getNewsDetails()
-         }, SPLASH_DELAY_MILLIS)
-    }
+    val progressBar = ObservableBoolean(false)
+    var liveImageData: LiveData<List<ImagePojo>>? = null
+    private var mContext: Context = mContext
+    val netWorkState = MutableLiveData<Boolean>()
 
     /**
-     * <h2>getNewsDetails</h2>
-     * this is the method to get news response from Api
+     * <h2>getImageDetails</h2>
+     * this is the method to the image url from post Api
      */
-    fun getNewsDetails() {
+    fun getImageDetails() {
         progressBar.set(true)
         val disposableObserver =
-                object : DisposableSingleObserver<Response<NewsResponse>>() {
-                    override fun onSuccess(value: Response<NewsResponse>) {
-                        progressBar.set(false)
-                        Log.d("TAG", "onError: "+value.code())
-                    }
+            object : DisposableSingleObserver<Response<ResponseBody>>() {
+                override fun onSuccess(value: Response<ResponseBody>) {
+                    progressBar.set(false)
+                    netWorkState.postValue(false)
+                    val path = value.body()!!.string()
+                    val jsonObject = JSONObject(path)
+                    saveData(jsonObject.getString(PATH))
+                }
 
-                    override fun onError(e: Throwable) {
-                        progressBar.set(false)
-                        if (e is NoConnectivityException) {
-                            Log.d("TAG", "onError: "+e.message)
-//                            _eventNewsArticle.postValue(Event(Pair(Constants.NO_INTERNET, e.message)))
-                        }
-                        else {
-                            Log.d("TAG", "onError: "+e.message)
-//                            _eventNewsArticle.postValue(Event(Pair(Constants.ERROR, e.message)))
-                        }
+                override fun onError(e: Throwable) {
+                    progressBar.set(false)
+                    if (e is NoConnectivityException) {
+                        netWorkState.postValue(true)
+                        Log.d("TAG", "onError: " + e.message)
+                    } else {
+                        Log.d("TAG", "onError: " + e.message)
                     }
                 }
-        homeRepository.getNewsDetails().subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(disposableObserver)
+            }
+        homeRepository.getPostDetails().subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(disposableObserver)
 
     }
 
-    fun onDelayObserver():MutableLiveData<Boolean>{
-        return _time
+    fun saveData(url: String) {
+        AsyncTask.execute {
+            var bitmap = Utility.getBitmapFromURL(url)
+            var image = ImagePojo()
+            image.image = bitmap
+            ImageRepository.insertImage(mContext, image)
+        }
+        getImageFromRoom()
+    }
+
+    fun getImageFromRoom(): LiveData<List<ImagePojo>>? {
+        liveImageData = ImageRepository.getImageData(mContext)
+        return liveImageData
+    }
+
+    fun checkNetworkState(): MutableLiveData<Boolean> {
+        return netWorkState
     }
 }
